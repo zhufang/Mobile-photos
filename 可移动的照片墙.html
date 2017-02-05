@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>可移动的照片墙</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <script>
+        ~function () {
+            var winW = document.documentElement.clientWidth,
+                    desW = 640,
+                    htmlFont = winW / desW * 100;
+            //->当屏幕的宽度大于设计稿的宽度,让音乐区域最大640PX即可
+            if (winW >= desW) {
+                $('.musicBox').css({
+                    width: desW,
+                    margin: '0 auto'
+                });
+                window.htmlFont = 100;
+                return;
+            }
+            window.htmlFont = htmlFont;
+            document.documentElement.style.fontSize = htmlFont + 'px';
+        }();
+    </script>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+        ul{
+            width: 480px;
+            height: 640px;
+            margin: 10px auto;
+            padding: 5px;
+            background: #ccc;
+        }
+        ul li{
+            width: 150px;
+            height: 150px;
+            margin: 5px;
+            float: left;
+            background: lightpink;
+        }
+        ul li img{
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<ul>
+    <li><img src="img2/1.jpg" alt=""></li>
+    <li><img src="img2/2.jpg" alt=""></li>
+    <li><img src="img2/3.jpg" alt=""></li>
+    <li><img src="img2/4.jpg" alt=""></li>
+    <li><img src="img2/5.jpg" alt=""></li>
+    <li><img src="img2/6.jpg" alt=""></li>
+    <li><img src="img2/7.jpg" alt=""></li>
+    <li><img src="img2/8.jpg" alt=""></li>
+    <li><img src="img2/9.jpg" alt=""></li>
+    <li><img src="img2/10.jpg" alt=""></li>
+    <li><img src="img2/11.jpg" alt=""></li>
+    <li><img src="img2/12.jpg" alt=""></li>
+</ul>
+<script src="js1/event.js"></script>
+<script src="js1/move.js"></script>
+<script src="js1/Drag.js"></script>
+<script>
+    var aLi=document.getElementsByTagName('li');
+    //1.布局转换
+    for(var i=aLi.length-1;i>=0;i--){
+        var oLi=aLi[i];
+        oLi.style.left=(oLi.l=oLi.offsetLeft)+'px';
+        oLi.style.top=(oLi.t=oLi.offsetTop)+'px';
+        oLi.style.position='absolute';
+        oLi.style.margin=0;
+        new Drag(oLi).on('selfDown',creaseIndex).on('selfMove',hited).on('selfUp',changePos);
+    }
+    var zIndex=0;
+    //提高层级
+    function creaseIndex(){
+        this.ele.style.zIndex=++zIndex;
+    }
+    //判断两个元素是否碰撞
+    function isHited(l,r){
+        if(l.offsetLeft+l.offsetWidth<r.offsetLeft||l.offsetTop+l.offsetHeight<r.offsetTop||l.offsetLeft>r.offsetLeft+r.offsetWidth||l.offsetTop>r.offsetTop+r.offsetHeight){
+            return false;
+        }else{
+            return true;
+        }
+    }
+    function hited(){
+        this.aHited=[];
+        for(var i=0;i<aLi.length;i++){
+            var oLi=aLi[i];
+            if(oLi===this.ele) continue;
+            if(isHited(this.ele,oLi)){
+                this.aHited.push(oLi);
+                oLi.style.background='red';
+            }else{
+                oLi.style.background=null;
+            }
+        }
+    }
+    function changePos(){
+        var a=this.aHited;
+        if(a && a.length){
+            for(var i=0;i<a.length;i++){
+                var oLi=a[i];
+                oLi.distance=Math.sqrt(Math.pow(this.ele.offsetTop-oLi.offsetTop,2)+Math.pow(this.ele.offsetLeft-oLi.offsetLeft,2));
+                oLi.style.background=null;
+            }
+            a.sort(function(a,b){
+                return a.distance-b.distance;
+            });
+            var shortest=a[0];
+            animate(shortest,{left:this.ele.l,top:this.ele.t},{duration:300,effect:3});
+            animate(this.ele,{left:shortest.l,top:shortest.t},{duration:300,effect:3});
+            this.ele.style.background='purple';
+            shortest.style.background='purple';
+            var l=this.ele.l,t=this.ele.t;
+            this.ele.l=shortest.l,this.ele.t=shortest.t;
+            shortest.l=l,shortest.t=t;
+
+        }else{
+            animate(this.ele,{left:this.ele.l,top:this.ele.t},{duration:500,effect:3})
+        }
+    }
+</script>
+</body>
+</html>
